@@ -232,6 +232,14 @@
       return d;
     }
 
+    function ago(date) {
+      const s = Math.floor((Date.now() - date) / 1000);
+      if (s < 60) return 'à l\'instant';
+      if (s < 3600) return `il y a ${Math.floor(s/60)} min`;
+      if (s < 86400) return `il y a ${Math.floor(s/3600)} h`;
+      return date.toLocaleDateString('fr');
+    }
+
     function subscribeRT() {
       supabase.channel('feed')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, ({ new: p }) => {
@@ -298,13 +306,7 @@
       else { closeSheet(); toast('Publié'); }
     };
 
-    
-      t.textContent = msg; t.className = `toast ${type} show`;
-      clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3000);
-    };
-    
-    
-      initApp();
+    initApp();
   </script>
 </body>
-</html>
+  </html>
