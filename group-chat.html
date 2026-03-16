@@ -138,10 +138,9 @@
       inp.style.fontSize   = isCode ? '0.77rem' : '';
     };
 
-     el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
-    window.enter  = e  => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
-    
-      initApp();
+    window.enter = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
+
+    initApp();
   </script>
 </body>
 </html>
