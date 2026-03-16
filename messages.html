@@ -225,10 +225,9 @@
       openChat(cId, u.id, u.prenom, u.avatar_color);
     };
 
-     el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
-    window.dmEnter = e  => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDM(); } };
-    
-      initApp();
+    window.dmEnter = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDM(); } };
+
+    initApp();
   </script>
 </body>
-</html>
+      </html>
