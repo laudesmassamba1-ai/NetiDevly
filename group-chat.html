@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevNet — Groupe</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <div class="chat-wrap">
+    <div class="topbar" style="position:relative">
+      <button class="icon-btn" onclick="history.back()" style="margin-right:.5rem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div style="display:flex;align-items:center;gap:.65rem;flex:1;min-width:0">
+        <div style="font-size:1.2rem;line-height:1;flex-shrink:0" id="gIco">·</div>
+        <div style="min-width:0">
+          <div class="topbar-title" id="gName" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Chargement…</div>
+          <div style="font-size:.7rem;color:var(--t3)" id="gSub"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-body" id="msgs">
+      <div class="loading"><span class="spin"></span></div>
+    </div>
+
+    <div class="chat-foot">
+      <button class="code-toggle-btn" id="codeBtn" onclick="toggleCode()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+      </button>
+      <textarea class="chat-input" id="msgIn"
+        placeholder="Envoyer un message…" rows="1"
+        oninput="resize(this)" onkeydown="enter(event)"></textarea>
+      <button class="send-btn" onclick="send()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase-config.js';
+    import { toast, esc, timeAgo, resize, haptic, btnLoad, btnReset, initApp } from './js/app.js';
+    const gId = new URLSearchParams(location.search).get('id');
+    if (!gId) location.replace('groups.html');
+
+    let me, profile, isCode = false;
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { location.replace('login.html'); }
+    else {
+      me = session.user;
+      const { data } = await supabase.from('users').select('*').eq('id', me.id).single();
+      profile = data;
+      loadInfo(); loadMsgs(); sub();
+    }
+
+    async function loadInfo() {
+      const { data: g } = await supabase.from('groups').select('*').eq('id', gId).single();
+      if (!g) { location.replace('groups.html'); return; }
+      document.getElementById('gIco').textContent  = g.emoji || '·';
+      document.getElementById('gName').textContent = g.name;
+      document.getElementById('gSub').textContent  = `${g.member_count||1} membre${(g.member_count||1)>1?'s':''} · ${g.category||'Groupe'}`;
+      document.title = `DevNet — ${g.name}`;
+    }
+
+    async function loadMsgs() {
+      const { data: msgs } = await supabase.from('group_messages')
+        .select('*').eq('group_id', gId)
+        .order('created_at', { ascending: true }).limit(100);
+      const area = document.getElementById('msgs');
+      area.innerHTML = '';
+      if (!msgs?.length) {
+        area.innerHTML = `<div class="empty"><div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3>Aucun message</h3><p>Lance la discussion</p></div>`;
+        return;
+      }
+      msgs.forEach(m => area.appendChild(build(m)));
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function build(m) {
+      const mine = m.author_id === me.id;
+      const time = m.created_at ? new Date(m.created_at).toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit'}) : '';
+      const row  = document.createElement('div');
+      row.className = `msg-row${mine ? ' me' : ''}`;
+      row.innerHTML = `
+        ${!mine ? `<div class="av av-sm ${m.author_color||'av-cyan'}">${(m.author_name||'?').charAt(0)}</div>` : ''}
+        <div class="msg-col">
+          ${!mine ? `<div class="msg-author">${m.author_name}</div>` : ''}
+          <div class="bubble ${mine ? 'me' : (m.is_code ? 'code' : 'them')}">${esc(m.text)}</div>
+          <div class="msg-time">${time}</div>
+        </div>
+        ${mine ? `<div class="av av-sm ${m.author_color||'av-violet'}">${(m.author_name||'?').charAt(0)}</div>` : ''}`;
+      return row;
+    }
+
+    function sub() {
+      supabase.channel(`gc-${gId}`)
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'group_messages',
+          filter: `group_id=eq.${gId}`
+        }, ({ new: m }) => {
+          const area = document.getElementById('msgs');
+          if (area.querySelector('.empty')) area.innerHTML = '';
+          area.appendChild(build(m));
+          area.scrollTop = area.scrollHeight;
+        }).subscribe();
+    }
+
+    window.send = async () => {
+      const inp  = document.getElementById('msgIn');
+      const text = inp.value.trim();
+      if (!text || !profile) return;
+      inp.value = ''; inp.style.height = 'auto';
+      await supabase.from('group_messages').insert({
+        group_id: gId, author_id: me.id,
+        author_name: profile.prenom, author_color: profile.avatar_color,
+        text, is_code: isCode
+      });
+      if (isCode) toggleCode();
+    };
+
+    window.toggleCode = () => {
+      isCode = !isCode;
+      const btn = document.getElementById('codeBtn');
+      const inp = document.getElementById('msgIn');
+      btn.classList.toggle('on', isCode);
+      inp.placeholder = isCode ? '// Ton code ici…' : 'Envoyer un message…';
+      inp.style.fontFamily = isCode ? "'DM Mono',monospace" : '';
+      inp.style.fontSize   = isCode ? '0.77rem' : '';
+    };
+
+     el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
+    window.enter  = e  => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
+    
+      initApp();
+  </script>
+</body>
+</html>

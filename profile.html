@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevNet — Profil</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-title">Mon profil</div>
+    <button class="icon-btn" id="editBtn" onclick="toggleEdit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="app">
+    <div id="view"><div class="loading"><span class="spin"></span></div></div>
+
+    <div id="editForm" style="display:none;padding:1rem">
+      <div class="sheet-title" style="margin-bottom:1rem">Modifier le profil</div>
+      <div class="field"><label>Bio</label>
+        <textarea class="input" id="eBio" rows="3" placeholder="Parle de toi en quelques mots…"></textarea>
+      </div>
+      <div class="field"><label>Filière</label>
+        <select class="input" id="eFil">
+          <option>Informatique</option><option>Génie Logiciel</option>
+          <option>Réseaux & Télécoms</option><option>Intelligence Artificielle</option>
+          <option>Cybersécurité</option><option>Data Science</option><option>Autre</option>
+        </select>
+      </div>
+      <div class="field"><label>Niveau</label>
+        <select class="input" id="eNiv">
+          <option>L1</option><option>L2</option><option>L3</option>
+          <option>M1</option><option>M2</option><option>Doctorat</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:.55rem">
+        <button class="btn btn-ghost" onclick="toggleEdit()">Annuler</button>
+        <button class="btn btn-primary btn-w" onclick="save()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="feed.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>Fil</a>
+    <a href="groups.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Groupes</a>
+    <a href="messages.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages</a>
+    <a href="profile.html" class="nav-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { supabase } from './js/supabase-config.js';
+    import { toast, esc, timeAgo, resize, haptic, btnLoad, btnReset, initApp } from './js/app.js';
+    let me, myProfile, editing = false;
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { window.location.replace('login.html'); }
+    else {
+      me = session.user;
+      const { data } = await supabase.from('users').select('*').eq('id', me.id).single();
+      myProfile = data;
+      if (!myProfile?.pseudo) { window.location.replace('register.html'); return; }
+      render(); loadPosts();
+    }
+
+    function render() {
+      const u = myProfile;
+      const langTags = (u.langages||[]).map(l => `<span class="tag tag-blue">${l}</span>`).join('');
+      document.getElementById('view').innerHTML = `
+        <div class="cover"></div>
+        <div class="profile-av-wrap">
+          <div class="av av-lg ${u.avatar_color}">${u.prenom.charAt(0)}</div>
+        </div>
+        <div class="profile-body">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem">
+            <div>
+              <div class="profile-name">${u.prenom}</div>
+              <div class="profile-handle">@${u.pseudo}</div>
+            </div>
+            <div style="display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end">
+              ${u.filiere ? `<span class="tag tag-green">${u.filiere}</span>` : ''}
+              ${u.niveau  ? `<span class="tag tag-amber">${u.niveau}</span>` : ''}
+            </div>
+          </div>
+          ${u.bio
+            ? `<div class="profile-bio">${u.bio}</div>`
+            : `<div class="profile-bio" style="color:var(--t4);font-style:italic">Aucune bio — clique sur l'icône crayon pour en ajouter une.</div>`
+          }
+          <div class="profile-tags">${langTags || `<span style="font-size:.8rem;color:var(--t4)">Aucun langage renseigné</span>`}</div>
+          <div class="profile-stats">
+            <div class="stat"><div class="stat-n" id="pCount">—</div><div class="stat-l">Posts</div></div>
+            <div class="stat"><div class="stat-n">${u.followers||0}</div><div class="stat-l">Abonnés</div></div>
+            <div class="stat"><div class="stat-n">${u.following||0}</div><div class="stat-l">Suivis</div></div>
+          </div>
+        </div>
+
+        <div class="tabs" style="margin:0 1rem">
+          <div class="tab active" onclick="switchTab('posts',this)">Posts</div>
+          <div class="tab" onclick="switchTab('infos',this)">Infos</div>
+          <div class="tab" onclick="switchTab('settings',this)">Paramètres</div>
+        </div>
+        <div id="tab-posts" class="tab-pane active">
+          <div id="postList"><div class="loading"><span class="spin"></span></div></div>
+        </div>
+        <div id="tab-infos" class="tab-pane">
+          <div class="card" style="margin-bottom:.45rem">
+            <div style="font-size:.68rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">Email</div>
+            <div style="font-size:.88rem">${u.email}</div>
+          </div>
+          <div class="card" style="margin-bottom:.45rem">
+            <div style="font-size:.68rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">Formation</div>
+            <div style="font-size:.88rem">${[u.filiere, u.niveau].filter(Boolean).join(' — ') || '—'}</div>
+          </div>
+          <div class="card">
+            <div style="font-size:.68rem;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Langages</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem">${langTags || '—'}</div>
+          </div>
+        </div>
+        <div id="tab-settings" class="tab-pane">
+          <div class="card">
+            <div style="font-size:.88rem;font-weight:700;margin-bottom:.25rem">Compte</div>
+            <div style="font-size:.8rem;color:var(--t3);margin-bottom:1rem">${u.email}</div>
+            <button class="btn btn-danger btn-w" onclick="logout()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Se déconnecter
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadPosts() {
+      const { data: posts } = await supabase.from('posts').select('*')
+        .eq('author_id', me.id).order('created_at', { ascending: false });
+      const cnt = document.getElementById('pCount');
+      if (cnt) cnt.textContent = posts?.length || 0;
+      const c = document.getElementById('postList');
+      if (!c) return;
+      if (!posts?.length) {
+        c.innerHTML = `<div class="empty"><div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>Aucun post</h3><p>Va dans le fil pour publier</p></div>`;
+        return;
+      }
+      c.innerHTML = '';
+      posts.forEach(p => {
+        const d = document.createElement('div');
+        d.className = 'post';
+        d.innerHTML = `
+          <div class="post-body" style="margin-bottom:.5rem">${(p.text||'').substring(0,140)}${(p.text||'').length>140?'…':''}</div>
+          ${p.has_code?`<div class="code-tag" style="margin-bottom:.5rem"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>${p.lang||'Code'}</div>`:''}
+          <div style="display:flex;gap:1rem;font-size:.76rem;color:var(--t3)">
+            <span style="display:flex;align-items:center;gap:.3rem"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>${p.likes||0}</span>
+            <span style="display:flex;align-items:center;gap:.3rem"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>${p.comments||0}</span>
+          </div>`;
+        c.appendChild(d);
+      });
+    }
+
+    window.switchTab = (name, el) => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById(`tab-${name}`)?.classList.add('active');
+    };
+
+    window.toggleEdit = () => {
+      editing = !editing;
+      document.getElementById('view').style.display = editing ? 'none' : 'block';
+      document.getElementById('editForm').style.display = editing ? 'block' : 'none';
+      if (editing && myProfile) {
+        document.getElementById('eBio').value = myProfile.bio || '';
+        document.getElementById('eFil').value = myProfile.filiere || '';
+        document.getElementById('eNiv').value = myProfile.niveau || '';
+      }
+    };
+
+    window.save = async () => {
+      const bio = document.getElementById('eBio').value.trim();
+      const filiere = document.getElementById('eFil').value;
+      const niveau  = document.getElementById('eNiv').value;
+      const { error } = await supabase.from('users').update({ bio, filiere, niveau }).eq('id', me.id);
+      if (error) { t('Erreur lors de la sauvegarde', 'err'); return; }
+      myProfile = { ...myProfile, bio, filiere, niveau };
+      toggleEdit(); render(); loadPosts();
+      t('Profil mis à jour');
+    };
+
+    window.logout = async () => { await supabase.auth.signOut(); window.location.replace('login.html'); };
+
+    window.t = (msg, type = 'ok') => {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.className = `toast ${type} show`;
+      clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000);
+    };
+      initApp();
+  </script>
+</body>
+</html>

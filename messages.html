@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevNet — Messages</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-title">Messages</div>
+    <button class="icon-btn" onclick="openNew()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="app">
+    <div style="padding:.65rem .8rem">
+      <div style="position:relative;margin-bottom:.9rem">
+        <svg style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="input" placeholder="Rechercher une conversation…"
+          style="padding-left:2.4rem;border-radius:100px"/>
+      </div>
+      <div id="convs"><div class="loading"><span class="spin"></span></div></div>
+    </div>
+  </div>
+
+  <!-- Chat privé plein écran -->
+  <div class="chat-overlay" id="chatOverlay">
+    <div class="topbar" style="position:relative">
+      <button class="icon-btn" onclick="closeChat()" style="margin-right:.6rem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="av av-sm av-cyan" id="chatAv" style="flex-shrink:0">?</div>
+      <div style="margin-left:.6rem">
+        <div class="topbar-title" id="chatName">…</div>
+        <div style="font-size:.7rem;color:var(--t3)">Message privé</div>
+      </div>
+    </div>
+    <div class="chat-body" id="chatMsgs">
+      <div class="loading"><span class="spin"></span></div>
+    </div>
+    <div class="chat-foot">
+      <textarea class="chat-input" id="dmIn"
+        placeholder="Envoyer un message…" rows="1"
+        oninput="resize(this)" onkeydown="dmEnter(event)"></textarea>
+      <button class="send-btn" onclick="sendDM()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sheet nouvelle conversation -->
+  <div class="overlay" id="newSheet">
+    <div class="sheet">
+      <div class="handle"></div>
+      <div class="sheet-title">Nouvelle conversation</div>
+      <div style="position:relative;margin-bottom:.8rem">
+        <svg style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="input" id="uSearch"
+          placeholder="Rechercher par pseudo ou prénom…"
+          style="padding-left:2.4rem" oninput="searchUsers()"/>
+      </div>
+      <div id="uResults"></div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="feed.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>Fil</a>
+    <a href="groups.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Groupes</a>
+    <a href="messages.html" class="nav-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages</a>
+    <a href="profile.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+  </nav>
+
+  <script type="module">
+    import { supabase } from './js/supabase-config.js';
+    import { toast, esc, timeAgo, resize, haptic, btnLoad, btnReset, initApp } from './js/app.js';
+    let me, profile, convId = null, dmCh = null;
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { location.replace('login.html'); }
+    else {
+      me = session.user;
+      const { data } = await supabase.from('users').select('*').eq('id', me.id).single();
+      profile = data; loadConvs();
+    }
+
+    async function loadConvs() {
+      const { data } = await supabase.from('conversations')
+        .select('*').contains('participants', [me.id])
+        .order('last_message_at', { ascending: false });
+      const c = document.getElementById('convs');
+      if (!data?.length) {
+        c.innerHTML = `<div class="empty"><div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3>Aucune conversation</h3><p>Clique sur l'icône crayon pour démarrer</p></div>`;
+        return;
+      }
+      c.innerHTML = '';
+      for (const conv of data) {
+        const otherId = conv.participants.find(p => p !== me.id);
+        const { data: u } = await supabase.from('users').select('prenom,avatar_color,pseudo').eq('id', otherId).single();
+        const name  = u?.prenom || 'Utilisateur';
+        const color = u?.avatar_color || 'av-cyan';
+        const time  = conv.last_message_at ? new Date(conv.last_message_at).toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit'}) : '';
+        const d = document.createElement('div');
+        d.className = 'row';
+        d.onclick = () => openChat(conv.id, otherId, name, color);
+        d.innerHTML = `
+          <div class="av av-sm ${color}">${name.charAt(0)}</div>
+          <div class="row-info">
+            <div class="row-title">${name}</div>
+            <div class="row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${conv.last_message || '…'}</div>
+          </div>
+          <div class="conv-time">${time}</div>`;
+        c.appendChild(d);
+      }
+    }
+
+    window.openChat = (cId, otherId, name, color) => {
+      convId = cId;
+      document.getElementById('chatName').textContent = name;
+      const av = document.getElementById('chatAv');
+      av.textContent = name.charAt(0);
+      av.className = `av av-sm ${color}`;
+      document.getElementById('chatOverlay').classList.add('open');
+      loadDMs(cId); subDMs(cId);
+    };
+    window.closeChat = () => {
+      document.getElementById('chatOverlay').classList.remove('open');
+      if (dmCh) { supabase.removeChannel(dmCh); dmCh = null; }
+    };
+
+    async function loadDMs(cId) {
+      const { data: msgs } = await supabase.from('direct_messages')
+        .select('*').eq('conversation_id', cId)
+        .order('created_at', { ascending: true }).limit(100);
+      const area = document.getElementById('chatMsgs');
+      area.innerHTML = '';
+      msgs?.forEach(m => area.appendChild(buildBubble(m)));
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function buildBubble(m) {
+      const mine = m.author_id === me.id;
+      const time = m.created_at ? new Date(m.created_at).toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit'}) : '';
+      const row  = document.createElement('div');
+      row.className = `msg-row${mine ? ' me' : ''}`;
+      row.innerHTML = `
+        <div class="msg-col">
+          <div class="bubble ${mine ? 'me' : 'them'}">${esc(m.text)}</div>
+          <div class="msg-time">${time}</div>
+        </div>`;
+      return row;
+    }
+
+    function subDMs(cId) {
+      dmCh = supabase.channel(`dm-${cId}`)
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'direct_messages',
+          filter: `conversation_id=eq.${cId}`
+        }, ({ new: m }) => {
+          const area = document.getElementById('chatMsgs');
+          area.appendChild(buildBubble(m));
+          area.scrollTop = area.scrollHeight;
+        }).subscribe();
+    }
+
+    window.sendDM = async () => {
+      const inp  = document.getElementById('dmIn');
+      const text = inp.value.trim();
+      if (!text || !convId || !profile) return;
+      inp.value = '';
+      await supabase.from('direct_messages').insert({
+        conversation_id: convId, author_id: me.id,
+        author_name: profile.prenom, text
+      });
+      await supabase.from('conversations').update({
+        last_message: text, last_message_at: new Date().toISOString()
+      }).eq('id', convId);
+    };
+
+    window.openNew  = () => document.getElementById('newSheet').classList.add('open');
+    window.closeNew = () => document.getElementById('newSheet').classList.remove('open');
+
+    window.searchUsers = async () => {
+      const q = document.getElementById('uSearch').value.trim().toLowerCase();
+      const res = document.getElementById('uResults');
+      if (q.length < 2) { res.innerHTML = ''; return; }
+      const { data: users } = await supabase.from('users').select('*').neq('id', me.id);
+      const found = (users||[]).filter(u => u.pseudo?.includes(q) || u.prenom?.toLowerCase().includes(q));
+      res.innerHTML = '';
+      if (!found.length) {
+        res.innerHTML = `<div style="text-align:center;padding:1.2rem;color:var(--t3);font-size:.82rem">Aucun résultat</div>`;
+        return;
+      }
+      found.forEach(u => {
+        const d = document.createElement('div');
+        d.className = 'user-result';
+        d.innerHTML = `
+          <div class="av av-sm ${u.avatar_color}">${u.prenom.charAt(0)}</div>
+          <div>
+            <div style="font-weight:700;font-size:.87rem">${u.prenom}</div>
+            <div style="font-size:.72rem;color:var(--t3)">@${u.pseudo} · ${u.filiere || '—'}</div>
+          </div>`;
+        d.onclick = () => startConv(u);
+        res.appendChild(d);
+      });
+    };
+
+    window.startConv = async u => {
+      const cId = [me.id, u.id].sort().join('_');
+      const { data: ex } = await supabase.from('conversations').select('id').eq('id', cId).single();
+      if (!ex) await supabase.from('conversations').insert({
+        id: cId, participants: [me.id, u.id],
+        last_message: '', last_message_at: new Date().toISOString()
+      });
+      document.getElementById('newSheet').classList.remove('open');
+      openChat(cId, u.id, u.prenom, u.avatar_color);
+    };
+
+     el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
+    window.dmEnter = e  => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDM(); } };
+    
+      initApp();
+  </script>
+</body>
+</html>

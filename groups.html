@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevNet — Groupes</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-title">Groupes</div>
+    <button class="icon-btn" onclick="openCreate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="app">
+    <div style="padding:.65rem .8rem">
+      <div style="position:relative;margin-bottom:.9rem">
+        <svg style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="input" id="search"
+          placeholder="Rechercher un groupe…"
+          style="padding-left:2.4rem;border-radius:100px"
+          oninput="filter()"/>
+      </div>
+      <div class="section-label">Mes groupes</div>
+      <div id="mine"><div class="loading"><span class="spin"></span></div></div>
+      <div class="section-label">Découvrir</div>
+      <div id="others"><div class="loading"><span class="spin"></span></div></div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="feed.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>Fil</a>
+    <a href="groups.html" class="nav-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Groupes</a>
+    <a href="messages.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages</a>
+    <a href="profile.html" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+  </nav>
+
+  <!-- Sheet créer groupe -->
+  <div class="overlay" id="createOverlay">
+    <div class="sheet">
+      <div class="handle"></div>
+      <div class="sheet-title">Nouveau groupe</div>
+      <div class="field"><label>Nom</label>
+        <input type="text" class="input" id="gName" placeholder="ex: Algo & Structures L2"/>
+      </div>
+      <div class="field"><label>Description</label>
+        <textarea class="input" id="gDesc" rows="2" placeholder="À quoi sert ce groupe ?"></textarea>
+      </div>
+      <div class="field"><label>Catégorie</label>
+        <select class="input" id="gCat">
+          <option>Matière / Cours</option>
+          <option>Projet de classe</option>
+          <option>Club de programmation</option>
+          <option>Entraide technique</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="field"><label>Icône</label>
+        <div class="emoji-grid" id="eGrid">
+          <div class="e-opt sel" data-e="💻">💻</div>
+          <div class="e-opt" data-e="🐍">🐍</div>
+          <div class="e-opt" data-e="⚡">⚡</div>
+          <div class="e-opt" data-e="🔧">🔧</div>
+          <div class="e-opt" data-e="📚">📚</div>
+          <div class="e-opt" data-e="🚀">🚀</div>
+          <div class="e-opt" data-e="🛡️">🛡️</div>
+          <div class="e-opt" data-e="🤖">🤖</div>
+          <div class="e-opt" data-e="🌐">🌐</div>
+          <div class="e-opt" data-e="📱">📱</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.55rem">
+        <button class="btn btn-ghost" onclick="closeCreate()">Annuler</button>
+        <button class="btn btn-primary btn-w" onclick="createGroup()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { supabase } from './js/supabase-config.js';
+    import { toast, esc, timeAgo, resize, haptic, btnLoad, btnReset, initApp } from './js/app.js';
+    let me, all = [], emoji = '💻';
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { window.location.replace('login.html'); }
+    else { me = session.user; load(); }
+
+    document.querySelectorAll('.e-opt').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.e-opt').forEach(e => e.classList.remove('sel'));
+        el.classList.add('sel'); emoji = el.dataset.e;
+      });
+    });
+
+    async function load() {
+      const { data } = await supabase.from('groups').select('*').order('created_at', { ascending: false });
+      all = data || []; render(all);
+    }
+
+    function render(groups) {
+      const mine   = groups.filter(g => g.members?.includes(me.id));
+      const others = groups.filter(g => !g.members?.includes(me.id));
+      renderList('mine', mine, true);
+      renderList('others', others, false);
+    }
+
+    function renderList(id, groups, joined) {
+      const el = document.getElementById(id);
+      if (!groups.length) {
+        el.innerHTML = `<div class="empty" style="padding:1.2rem 0">
+          <div class="empty-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <h3>${joined ? 'Aucun groupe rejoint' : 'Aucun groupe disponible'}</h3>
+        </div>`;
+        return;
+      }
+      el.innerHTML = '';
+      groups.forEach(g => {
+        const d = document.createElement('div');
+        d.className = 'row';
+        d.innerHTML = `
+          <div class="group-ico">${g.emoji || '👥'}</div>
+          <div class="row-info">
+            <div class="row-title">${g.name}</div>
+            <div class="row-sub">${g.category || 'Groupe'} · ${g.member_count || 1} membre${(g.member_count||1)>1?'s':''}</div>
+          </div>
+          ${joined
+            ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();go('${g.id}')">Ouvrir</button>`
+            : `<button class="btn btn-sm btn-primary"   onclick="event.stopPropagation();join('${g.id}',this)">Rejoindre</button>`
+          }`;
+        if (joined) d.onclick = () => go(g.id);
+        el.appendChild(d);
+      });
+    }
+
+    window.join = async (id, btn) => {
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+      const g = all.find(x => x.id === id);
+      const m = [...(g.members||[]), me.id];
+      await supabase.from('groups').update({ members: m, member_count: m.length }).eq('id', id);
+      toast('Groupe rejoint'); load();
+    };
+    window.go = id => window.location.href = `group-chat.html?id=${id}`;
+
+    window.openCreate  = () => document.getElementById('createOverlay').classList.add('open');
+    window.closeCreate = () => document.getElementById('createOverlay').classList.remove('open');
+    window.createGroup = async () => {
+      const name = document.getElementById('gName').value.trim();
+      if (!name) { toast('Donne un nom au groupe', 'err'); return; }
+      await supabase.from('groups').insert({
+        name,
+        description: document.getElementById('gDesc').value.trim(),
+        category: document.getElementById('gCat').value,
+        emoji, created_by: me.id, members: [me.id], member_count: 1
+      });
+      closeCreate(); toast('Groupe créé'); load();
+    };
+    window.filter = () => {
+      const q = document.getElementById('search').value.toLowerCase();
+      render(all.filter(g => g.name.toLowerCase().includes(q) || (g.description||'').toLowerCase().includes(q)));
+    };
+
+     show`;
+      clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+      initApp();
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevNet — Connexion</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .auth-page { position:relative; overflow:hidden; }
+    .glow-tl {
+      position:fixed; width:420px; height:420px; border-radius:50%;
+      background:radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%);
+      top:-160px; left:-100px; pointer-events:none; z-index:0;
+    }
+    .glow-br {
+      position:fixed; width:320px; height:320px; border-radius:50%;
+      background:radial-gradient(circle, rgba(202,255,51,0.07) 0%, transparent 70%);
+      bottom:-100px; right:-80px; pointer-events:none; z-index:0;
+    }
+    .auth-box { position:relative; z-index:1; animation:up 0.4s var(--ease-out) both; }
+    @keyframes up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="glow-tl"></div>
+    <div class="glow-br"></div>
+
+    <div class="auth-box">
+      <div class="auth-mark">
+        <div class="wordmark">DevNet<span class="dot">.</span></div>
+      </div>
+      <div class="auth-sub">Le réseau des développeurs étudiants</div>
+
+      <div class="auth-panel">
+        <div class="auth-h">Connexion</div>
+        <div class="auth-desc">Accède à ta communauté</div>
+
+        <div class="err" id="err"></div>
+
+        <div class="field">
+          <label>Adresse email</label>
+          <input type="email" id="email" class="input" placeholder="ton@email.com" autocomplete="email"/>
+        </div>
+
+        <div class="field">
+          <label>Mot de passe</label>
+          <div class="pw-wrap">
+            <input type="password" id="pw" class="input" placeholder="••••••••" autocomplete="current-password"/>
+            <button class="pw-eye" onclick="togglePw()" type="button">
+              <svg id="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-w" id="loginBtn" onclick="login()">
+          Se connecter
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        Pas encore de compte ? <a href="register.html">Créer un compte</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase-config.js';
+    import { toast, esc, timeAgo, resize, haptic, btnLoad, btnReset, initApp } from './js/app.js';
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (session) window.location.replace('index.html');
+
+    window.togglePw = () => {
+      const i = document.getElementById('pw');
+      const e = document.getElementById('eye');
+      if (i.type === 'password') {
+        i.type = 'text';
+        e.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+      } else {
+        i.type = 'password';
+        e.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+      }
+    };
+
+    window.login = async () => {
+      const email = document.getElementById('email').value.trim();
+      const pw    = document.getElementById('pw').value;
+      const btn   = document.getElementById('loginBtn');
+      const err   = document.getElementById('err');
+      err.classList.remove('show');
+
+      if (!email || !pw) {
+        err.textContent = 'Remplis les deux champs.';
+        err.classList.add('show'); return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span>';
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+
+      if (error) {
+        err.textContent = 'Email ou mot de passe incorrect.';
+        err.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Se connecter';
+      } else {
+        window.location.replace('feed.html');
+      }
+    };
+
+    document.getElementById('pw').addEventListener('keydown', e => {
+      if (e.key === 'Enter') window.login();
+    });
+      initApp();
+  </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevNet — Inscription</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .auth-page { position:relative; overflow:hidden; }
+    .glow {
+      position:fixed; width:380px; height:380px; border-radius:50%;
+      background:radial-gradient(circle,rgba(56,189,248,0.08) 0%,transparent 70%);
+      top:-120px; right:-80px; pointer-events:none; z-index:0;
+    }
+    .auth-box { position:relative; z-index:1; animation:up 0.4s var(--ease-out) both; }
+    @keyframes up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .step { display:none; }
+    .step.active { display:block; }
+  </style>
+</head>
+<body>
+  <div class="auth-page top">
+    <div class="glow"></div>
+
+    <div class="auth-box">
+      <div class="auth-mark">
+        <div class="wordmark">DevNet<span class="dot">.</span></div>
+      </div>
+      <div class="auth-sub">Crée ton profil de développeur</div>
+
+      <div class="auth-panel">
+        <div class="progress"><div class="progress-fill" id="pbar" style="width:50%"></div></div>
+        <div class="err" id="err"></div>
+
+        <!-- Étape 1 -->
+        <div id="s1" class="step active">
+          <div class="auth-h">Informations</div>
+          <div class="auth-desc" style="margin-bottom:1.1rem">Dis-nous qui tu es</div>
+
+          <div class="row2">
+            <div class="field"><label>Prénom</label>
+              <input type="text" id="prenom" class="input" placeholder="Koffi"/>
+            </div>
+            <div class="field"><label>Pseudo</label>
+              <input type="text" id="pseudo" class="input" placeholder="koffi_dev"/>
+            </div>
+          </div>
+
+          <div class="field"><label>Email</label>
+            <input type="email" id="email" class="input" placeholder="ton@email.com" autocomplete="email"/>
+          </div>
+
+          <div class="row2">
+            <div class="field"><label>Filière</label>
+              <select id="filiere" class="input">
+                <option value="">Choisir…</option>
+                <option>Informatique</option>
+                <option>Génie Logiciel</option>
+                <option>Réseaux & Télécoms</option>
+                <option>Intelligence Artificielle</option>
+                <option>Cybersécurité</option>
+                <option>Data Science</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field"><label>Niveau</label>
+              <select id="niveau" class="input">
+                <option value="">Choisir…</option>
+                <option>L1</option><option>L2</option><option>L3</option>
+                <option>M1</option><option>M2</option><option>Doctorat</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-w" onclick="next()">Continuer</button>
+        </div>
+
+        <!-- Étape 2 -->
+        <div id="s2" class="step">
+          <div class="auth-h">Profil technique</div>
+          <div class="auth-desc" style="margin-bottom:1.1rem">Tes langages et ton mot de passe</div>
+
+          <div class="field">
+            <label>Langages maîtrisés</label>
+            <div class="chips" id="langChips">
+              <span class="chip" data-l="Python">Python</span>
+              <span class="chip" data-l="JavaScript">JavaScript</span>
+              <span class="chip" data-l="Java">Java</span>
+              <span class="chip" data-l="C / C++">C / C++</span>
+              <span class="chip" data-l="PHP">PHP</span>
+              <span class="chip" data-l="TypeScript">TypeScript</span>
+              <span class="chip" data-l="Kotlin">Kotlin</span>
+              <span class="chip" data-l="Dart">Dart</span>
+              <span class="chip" data-l="Go">Go</span>
+              <span class="chip" data-l="Rust">Rust</span>
+              <span class="chip" data-l="Swift">Swift</span>
+              <span class="chip" data-l="SQL">SQL</span>
+            </div>
+          </div>
+
+          <div class="field"><label>Mot de passe</label>
+            <input type="password" id="pw" class="input" placeholder="Minimum 6 caractères"/>
+          </div>
+          <div class="field"><label>Confirmer le mot de passe</label>
+            <input type="password" id="pw2" class="input" placeholder="Répète ton mot de passe"/>
+          </div>
+
+          <div style="display:flex;gap:0.55rem">
+            <button class="btn btn-ghost" onclick="prev()"
+              style="width:42px;padding:0;flex-shrink:0;border-radius:50%">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="btn btn-primary btn-w" id="regBtn" onclick="register()">
+              Créer mon compte
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-footer">Déjà inscrit ? <a href="login.html">Se connecter</a></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase-config.js';
+    import { toast, esc, timeAgo, resize, haptic, btnLoad, btnReset, initApp } from './js/app.js';
+
+    const AV = ['av-lime','av-cyan','av-pink','av-orange','av-violet'];
+    const langs = new Set();
+
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => {
+        c.classList.toggle('on');
+        c.classList.contains('on') ? langs.add(c.dataset.l) : langs.delete(c.dataset.l);
+      });
+    });
+
+    function showErr(msg) {
+      const e = document.getElementById('err');
+      e.textContent = msg; e.classList.add('show');
+    }
+
+    window.prev = () => {
+      document.getElementById('s1').classList.add('active');
+      document.getElementById('s2').classList.remove('active');
+      document.getElementById('pbar').style.width = '50%';
+      document.getElementById('err').classList.remove('show');
+    };
+
+    window.next = () => {
+      document.getElementById('err').classList.remove('show');
+      const g = id => document.getElementById(id).value.trim();
+      if (!g('prenom') || !g('pseudo') || !g('email') || !g('filiere') || !g('niveau')) {
+        showErr('Remplis tous les champs.'); return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g('email'))) {
+        showErr('Adresse email invalide.'); return;
+      }
+      document.getElementById('s1').classList.remove('active');
+      document.getElementById('s2').classList.add('active');
+      document.getElementById('pbar').style.width = '100%';
+    };
+
+    window.register = async () => {
+      document.getElementById('err').classList.remove('show');
+      const g   = id => document.getElementById(id).value.trim();
+      const prenom  = g('prenom');
+      const pseudo  = g('pseudo').toLowerCase().replace(/[^a-z0-9_]/g,'');
+      const email   = g('email');
+      const filiere = g('filiere');
+      const niveau  = g('niveau');
+      const pw      = document.getElementById('pw').value;
+      const pw2     = document.getElementById('pw2').value;
+      const btn     = document.getElementById('regBtn');
+
+      if (pw !== pw2)     { showErr('Les mots de passe ne correspondent pas.'); return; }
+      if (pw.length < 6)  { showErr('Mot de passe trop court (6 caractères minimum).'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span>';
+
+      const { data, error } = await supabase.auth.signUp({
+        email, password: pw,
+        options: {
+          data: {
+            prenom, pseudo, filiere, niveau,
+            langages: [...langs],
+            avatar_color: AV[Math.floor(Math.random() * AV.length)]
+          }
+        }
+      });
+
+      if (error) {
+        showErr(error.message.includes('already') ? 'Email déjà utilisé.' : error.message);
+        btn.disabled = false; btn.textContent = 'Créer mon compte'; return;
+      }
+
+      if (data.user) {
+        await supabase.from('users').upsert({
+          id: data.user.id, prenom, pseudo, email,
+          filiere, niveau, langages: [...langs],
+          avatar_color: AV[Math.floor(Math.random() * AV.length)], bio: ''
+        }, { onConflict: 'id' });
+      }
+
+      window.location.replace('feed.html');
+    };
+      initApp();
+  </script>
+</body>
+</html>
