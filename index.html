@@ -6,24 +6,48 @@
   <title>DevNet</title>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    body { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100dvh; gap:1.2rem; }
-    .mark { font-size:1.8rem; font-weight:800; letter-spacing:-1px; animation:pulse 1.4s ease infinite alternate; }
+    body {
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      min-height:100dvh; gap:1.2rem;
+    }
+    .mark {
+      font-size:1.8rem; font-weight:800; letter-spacing:-1px;
+      animation:pulse 1.4s ease infinite alternate;
+    }
     .mark .dot { color:var(--green); }
-    .sub { font-size:0.75rem; color:var(--t4); display:flex; align-items:center; gap:0.5rem; }
+    .sub {
+      font-size:0.75rem; color:var(--t3);
+      display:flex; align-items:center; gap:0.5rem;
+    }
     @keyframes pulse { from{opacity:0.3} to{opacity:1} }
   </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
   <div class="mark">DevNet<span class="dot">.</span></div>
   <div class="sub"><span class="spin"></span> Chargement</div>
+
   <script type="module">
-    import { supabase, getOrCreateProfile } from './js/supabase-config.js';
-    const { data:{ session } } = await supabase.auth.getSession();
-    if (!session) { window.location.replace('login.html'); return; }
-    const { profile } = await getOrCreateProfile(session.user);
-    window.location.replace((!profile?.pseudo) ? 'register.html' : 'feed.html');
+    import { supabase } from './js/supabase-config.js';
+
+    // Timeout de sécurité : si Supabase ne répond pas en 6s → login
+    const timeout = setTimeout(() => {
+      window.location.replace('login.html');
+    }, 6000);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      clearTimeout(timeout);
+
+      if (session) {
+        window.location.replace('feed.html');
+      } else {
+        window.location.replace('login.html');
+      }
+    } catch (e) {
+      clearTimeout(timeout);
+      window.location.replace('login.html');
+    }
   </script>
 </body>
 </html>
