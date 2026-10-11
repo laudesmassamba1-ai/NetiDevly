@@ -1,6 +1,38 @@
 import { NextResponse } from 'next/server';
 import pool from '@/db/db';
 
+//route GET : Récupérer un utilisateur par ID
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> } 
+) {
+  try {
+    const { id } = await params;
+    const idNum = Number(id);
+    if (!Number.isInteger(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { success: false, error: 'Identifiant invalide' },
+        { status: 400 }
+      );
+    }
+
+    const client = await pool.connect();
+    const result = await client.query('SELECT * FROM utilisateurs WHERE id = $1;', [idNum]);
+    client.release();
+
+    if (result.rowCount === 0) {
+      return NextResponse.json({ success: false, error: 'Utilisateur non trouvé' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: result.rows[0] }, { status: 200 });
+  } catch (error: any) {
+    console.error('Erreur lors de la récupération de l\'utilisateur :', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
 
 // Route PATCH : Mettre à jour partiellement un utilisateur
 export async function PATCH(
@@ -54,22 +86,31 @@ export async function PATCH(
 }
 
 // Route DELETE : Supprimer un utilisateur
-export async function DELETE(request: Request) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await request.json();
-    const idNum= Number(id);
-    if(!Number.isInteger(idNum)||idNum<=0){
-        return NextResponse.json(
-           { success: false, error: 'identifiant invalide'},
-           {status: 404}
-        );
+    // On doit faire un await sur params dans cette version de Next.js
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    
+    const idNum = Number(id);
+    if (!Number.isInteger(idNum) || idNum <= 0) {
+      return NextResponse.json(
+        { success: false, error: 'Identifiant invalide' },
+        { status: 400 }
+      );
     }
+
     const client = await pool.connect();
-    const result = await client.query('DELETE FROM utilisateurs WHERE id = $1 RETURNING *;', [id]);
+    const result = await client.query('DELETE FROM utilisateurs WHERE id = $1 RETURNING *;', [idNum]);
     client.release();
+
     if (result.rowCount === 0) {
       return NextResponse.json({ success: false, error: 'Utilisateur non trouvé' }, { status: 404 });
     }
+
     return NextResponse.json({ success: true, data: result.rows[0] }, { status: 200 });
   } catch (error: any) {
     console.error('Erreur lors de la suppression de l\'utilisateur :', error);
