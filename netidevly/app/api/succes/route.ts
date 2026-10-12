@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import pool from '@/db/db';
 
 //route GET : pour recuperer tous les succes
@@ -12,7 +12,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('Erreur de connexion à la base de données :', error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Erreur interne' },
       { status: 500 }
     );
   }

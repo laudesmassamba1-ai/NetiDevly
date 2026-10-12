@@ -5,7 +5,6 @@ import { lireSession } from '@/lib/session';
 // GET /api/publications/[id] : une publication avec son auteur, ses compteurs et ses hashtags
 export async function GET(
     request: Request,
-    ?avant=ID;
 
 ) {
   // 1. QUI ? L'identité vient du cookie de session, jamais de l'URL ni du body
@@ -38,25 +37,18 @@ export async function GET(
                 WHERE ph.publication_id = p.id)   AS hashtags
          FROM publications p
          JOIN utilisateurs u ON u.id = p.auteur_id
-        WHERE p.id = $1`,
+        WHERE p.id = $1
+        ORDER BY p.id DESC LIMIT 20`,
     );
 
-    // 4. L'id est valide mais la ligne n'existe pas => 404
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Introuvable' },
-        { status: 404 }
-      );
-    }
-
-    // 5. Réponse avec UNE ligne (rows[0]), pas le tableau
+    // 5. Réponse avec UNE ligne 
     return NextResponse.json(
-      { success: true, data: result.rows[0] },
+      { success: true, data: result.rows },
       { status: 200 }
     );
   } catch (error) {
     // Le détail reste dans le terminal du serveur, jamais dans la réponse
-    console.error('Erreur lors de la lecture de la publication :', error);
+    console.error('Erreur lors de la lecture de la fil :', error);
     return NextResponse.json(
       { success: false, error: 'Erreur interne' },
       { status: 500 }
