@@ -1,0 +1,287 @@
+{
+  "@img/colour@1.1.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/lovell/colour",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@img\\colour",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@img\\colour\\LICENSE.md"
+  },
+  "@img/sharp-win32-x64@0.35.5": {
+    "licenses": "Apache-2.0 AND LGPL-3.0-or-later",
+    "repository": "https://github.com/lovell/sharp",
+    "publisher": "Lovell Fuller",
+    "email": "npm@lovell.info",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@img\\sharp-win32-x64",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@img\\sharp-win32-x64\\LICENSE"
+  },
+  "@next/env@16.4.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/vercel/next.js",
+    "publisher": "Next.js Team",
+    "email": "support@vercel.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@next\\env",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@next\\env\\README.md"
+  },
+  "@next/swc-win32-x64-msvc@16.4.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/vercel/next.js",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@next\\swc-win32-x64-msvc",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@next\\swc-win32-x64-msvc\\README.md"
+  },
+  "@swc/helpers@0.5.23": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/swc-project/swc",
+    "publisher": "강동윤",
+    "email": "kdy1997.dev@gmail.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@swc\\helpers",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\@swc\\helpers\\LICENSE"
+  },
+  "baseline-browser-mapping@2.11.28": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/web-platform-dx/baseline-browser-mapping",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\baseline-browser-mapping",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\baseline-browser-mapping\\LICENSE.txt"
+  },
+  "bcryptjs@3.0.3": {
+    "licenses": "BSD-3-Clause",
+    "repository": "https://github.com/dcodeIO/bcrypt.js",
+    "publisher": "Daniel Wirtz",
+    "email": "dcode@dcode.io",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\bcryptjs",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\bcryptjs\\LICENSE"
+  },
+  "caniuse-lite@1.0.30001815": {
+    "licenses": "CC-BY-4.0",
+    "repository": "https://github.com/browserslist/caniuse-lite",
+    "publisher": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\caniuse-lite",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\caniuse-lite\\LICENSE"
+  },
+  "client-only@0.0.1": {
+    "licenses": "MIT",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\client-only"
+  },
+  "detect-libc@2.1.2": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/lovell/detect-libc",
+    "publisher": "Lovell Fuller",
+    "email": "npm@lovell.info",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\detect-libc",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\detect-libc\\LICENSE"
+  },
+  "jose@6.2.12": {
+    "licenses": "MIT",
+    "repository": "https://github.com/panva/jose",
+    "publisher": "Filip Skokan",
+    "email": "panva.ip@gmail.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\jose",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\jose\\LICENSE.md"
+  },
+  "nanoid@3.3.20": {
+    "licenses": "MIT",
+    "repository": "https://github.com/ai/nanoid",
+    "publisher": "Andrey Sitnik",
+    "email": "andrey@sitnik.ru",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\nanoid",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\nanoid\\LICENSE"
+  },
+  "netidevly@0.1.0": {
+    "licenses": "UNLICENSED",
+    "private": true,
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\README.md"
+  },
+  "next@16.4.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/vercel/next.js",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\next",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\next\\license.md"
+  },
+  "pg-cloudflare@1.4.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/brianc/node-postgres",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-cloudflare",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-cloudflare\\LICENSE"
+  },
+  "pg-connection-string@2.14.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/brianc/node-postgres",
+    "publisher": "Blaine Bublitz",
+    "email": "blaine@iceddev.com",
+    "url": "http://iceddev.com/",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-connection-string",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-connection-string\\LICENSE"
+  },
+  "pg-int8@1.0.1": {
+    "licenses": "ISC",
+    "repository": "https://github.com/charmander/pg-int8",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-int8",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-int8\\LICENSE"
+  },
+  "pg-pool@3.14.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/brianc/node-postgres",
+    "publisher": "Brian M. Carlson",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-pool",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-pool\\LICENSE"
+  },
+  "pg-protocol@1.16.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/brianc/node-postgres",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-protocol",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-protocol\\LICENSE"
+  },
+  "pg-types@2.2.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/brianc/node-pg-types",
+    "publisher": "Brian M. Carlson",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-types",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg-types\\README.md"
+  },
+  "pg@8.23.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/brianc/node-postgres",
+    "publisher": "Brian Carlson",
+    "email": "brian.m.carlson@gmail.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pg\\LICENSE"
+  },
+  "pgpass@1.0.5": {
+    "licenses": "MIT",
+    "repository": "https://github.com/hoegaarden/pgpass",
+    "publisher": "Hannes Hörl",
+    "email": "hannes.hoerl+pgpass@snowreporter.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pgpass",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\pgpass\\README.md"
+  },
+  "picocolors@1.1.1": {
+    "licenses": "ISC",
+    "repository": "https://github.com/alexeyraspopov/picocolors",
+    "publisher": "Alexey Raspopov",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\picocolors",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\picocolors\\LICENSE"
+  },
+  "postcss@8.5.23": {
+    "licenses": "MIT",
+    "repository": "https://github.com/postcss/postcss",
+    "publisher": "Andrey Sitnik",
+    "email": "andrey@sitnik.es",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postcss",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postcss\\LICENSE"
+  },
+  "postgres-array@2.0.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/bendrucker/postgres-array",
+    "publisher": "Ben Drucker",
+    "email": "bvdrucker@gmail.com",
+    "url": "bendrucker.me",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-array",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-array\\license"
+  },
+  "postgres-bytea@1.0.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/bendrucker/postgres-bytea",
+    "publisher": "Ben Drucker",
+    "email": "bvdrucker@gmail.com",
+    "url": "bendrucker.me",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-bytea",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-bytea\\license"
+  },
+  "postgres-date@1.0.7": {
+    "licenses": "MIT",
+    "repository": "https://github.com/bendrucker/postgres-date",
+    "publisher": "Ben Drucker",
+    "email": "bvdrucker@gmail.com",
+    "url": "bendrucker.me",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-date",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-date\\license"
+  },
+  "postgres-interval@1.2.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/bendrucker/postgres-interval",
+    "publisher": "Ben Drucker",
+    "email": "bvdrucker@gmail.com",
+    "url": "bendrucker.me",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-interval",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\postgres-interval\\license"
+  },
+  "react-dom@19.3.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/react/react",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\react-dom",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\react-dom\\LICENSE"
+  },
+  "react@19.3.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/react/react",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\react",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\react\\LICENSE"
+  },
+  "scheduler@0.28.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/react/react",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\scheduler",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\scheduler\\LICENSE"
+  },
+  "semver@7.8.5": {
+    "licenses": "ISC",
+    "repository": "https://github.com/npm/node-semver",
+    "publisher": "GitHub Inc.",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\sharp\\node_modules\\semver",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\sharp\\node_modules\\semver\\LICENSE"
+  },
+  "sharp@0.35.5": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/lovell/sharp",
+    "publisher": "Lovell Fuller",
+    "email": "npm@lovell.info",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\sharp",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\sharp\\LICENSE"
+  },
+  "source-map-js@1.2.2": {
+    "licenses": "BSD-3-Clause",
+    "repository": "https://github.com/7rulnik/source-map-js",
+    "publisher": "Valentin 7rulnik Semirulnik",
+    "email": "v7rulnik@gmail.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\source-map-js",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\source-map-js\\LICENSE"
+  },
+  "split2@4.2.0": {
+    "licenses": "ISC",
+    "repository": "https://github.com/mcollina/split2",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\split2",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\split2\\LICENSE"
+  },
+  "styled-jsx@5.1.6": {
+    "licenses": "MIT",
+    "repository": "https://github.com/vercel/styled-jsx",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\styled-jsx",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\styled-jsx\\license.md"
+  },
+  "tslib@2.8.1": {
+    "licenses": "0BSD",
+    "repository": "https://github.com/Microsoft/tslib",
+    "publisher": "Microsoft Corp.",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\tslib",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\tslib\\LICENSE.txt"
+  },
+  "xtend@4.0.2": {
+    "licenses": "MIT",
+    "repository": "https://github.com/Raynos/xtend",
+    "publisher": "Raynos",
+    "email": "raynos2@gmail.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\xtend",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\xtend\\LICENSE"
+  },
+  "zod@4.6.6": {
+    "licenses": "MIT",
+    "repository": "https://github.com/colinhacks/zod",
+    "publisher": "Colin McDonnell",
+    "email": "zod@colinhacks.com",
+    "path": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\zod",
+    "licenseFile": "C:\\Users\\pc\\Documents\\NetiDevly\\netidevly\\node_modules\\zod\\LICENSE"
+  }
+}
