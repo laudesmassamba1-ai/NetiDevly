@@ -38,7 +38,7 @@ export async function GET(
                 WHERE c.publication_id = p.id)    AS nb_commentaires,
               (SELECT count(*)::int FROM reposts rp
                 WHERE rp.publication_id = p.id)   AS nb_reposts,
-              (SELECT COALESCE(array_agg(h.nom ORDER BY h.nom), '{}')
+              (SELECT COALESCE array_agg(h.nom::text ORDER BY h.nom), '{}'::text[])
                  FROM publications_hashtags ph
                  JOIN hashtags h ON h.id = ph.hashtag_id
                 WHERE ph.publication_id = p.id)   AS hashtags
