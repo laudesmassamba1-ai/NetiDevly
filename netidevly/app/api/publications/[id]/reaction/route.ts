@@ -53,12 +53,29 @@ export async function PUT(
 
     // 3. Une réaction par personne et par publication (clé primaire).
     //    ON CONFLICT ... DO UPDATE : si elle existe déjà, on change juste son type.
+    //    Dans la MÊME requête (donc tout ou rien), on prévient l'auteur de la publication
+    //    par une notification 'like' : sauf si c'est moi, et sans doublon si j'ai déjà
+    //    notifié pour cette publication (changer de réaction ne re-notifie pas).
     const result = await pool.query(
-      `INSERT INTO reactions (publication_id, utilisateur_id, type)
-       VALUES ($1, $2, $3)
-       ON CONFLICT (publication_id, utilisateur_id)
-       DO UPDATE SET type = EXCLUDED.type
-       RETURNING publication_id, type`,
+      `WITH r AS (
+         INSERT INTO reactions (publication_id, utilisateur_id, type)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (publication_id, utilisateur_id)
+         DO UPDATE SET type = EXCLUDED.type
+         RETURNING publication_id, type
+       ), n AS (
+         INSERT INTO notifications (utilisateur_id, acteur_id, type, publication_id)
+         SELECT p.auteur_id, $2, 'like', p.id
+           FROM publications p
+           JOIN r ON r.publication_id = p.id
+          WHERE p.auteur_id <> $2
+            AND NOT EXISTS (SELECT 1 FROM notifications x
+                             WHERE x.type = 'like'
+                               AND x.acteur_id = $2
+                               AND x.publication_id = p.id)
+         RETURNING 1
+       )
+       SELECT publication_id, type FROM r`,
       [idNum, session.id, parsed.data.type]
     );
 

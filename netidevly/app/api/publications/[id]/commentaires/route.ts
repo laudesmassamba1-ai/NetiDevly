@@ -135,6 +135,20 @@ export async function POST(
       [session.id, commentaire.id]
     );
 
+    // Notification 'commentaire' : l'auteur de la publication, et l'auteur du commentaire
+    // auquel je réponds (s'il y en a un). Jamais moi-même, jamais deux fois la même personne.
+    await client.query(
+      `INSERT INTO notifications (utilisateur_id, acteur_id, type, publication_id, commentaire_id)
+       SELECT DISTINCT d.dest, $1::int, 'commentaire', $2::int, $3::int
+         FROM (
+           SELECT p.auteur_id AS dest FROM publications p WHERE p.id = $2::int
+           UNION
+           SELECT c.auteur_id FROM commentaires c WHERE c.id = $4::int
+         ) d
+        WHERE d.dest <> $1::int`,
+      [session.id, idNum, commentaire.id, parent_id ?? null]
+    );
+
     await client.query('COMMIT');
 
     return NextResponse.json(
