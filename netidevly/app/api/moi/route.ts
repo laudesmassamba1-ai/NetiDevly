@@ -20,9 +20,9 @@ export async function GET() {
     //    L'email est renvoyé ici car c'est le propriétaire du compte qui le demande.
     const result = await pool.query(
       `SELECT id, pseudo, nom_affiche, email, type_compte, est_verifie,
-              bio, theme_banniere, filiere, niveau_etude, objectif_hebdo,
-              gels_serie, cree_le
-         FROM utilisateurs
+        bio, theme_banniere, filiere, niveau_etude, pays, ville, objectif_hebdo,
+        gels_serie, cree_le
+        FROM utilisateurs
         WHERE id = $1`,
       [session.id]
     );
@@ -59,6 +59,8 @@ const profilSchema = z.object({
   theme_banniere: z.string().trim().max(50).nullable().optional(),
   filiere: z.string().trim().max(100).nullable().optional(),
   niveau_etude: z.string().trim().max(20).nullable().optional(),
+  pays: z.string().trim().min(2).max(60).nullable().optional(),
+  ville: z.string().trim().min(2).max(60).nullable().optional(),
   objectif_hebdo: z.union([z.literal(3), z.literal(5), z.literal(7), z.literal(10)]).optional(),
 });
 
@@ -111,7 +113,7 @@ export async function PATCH(request: Request) {
           SET ${set}
         WHERE id = $1
         RETURNING id, pseudo, nom_affiche, email, type_compte, est_verifie,
-                  bio, theme_banniere, filiere, niveau_etude, objectif_hebdo,
+                  bio, theme_banniere, filiere, niveau_etude, pays, ville, objectif_hebdo,
                   gels_serie, cree_le`,
       [session.id, ...valeurs]
     );

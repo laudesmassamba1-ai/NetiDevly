@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const result = await pool.query(
-      `SELECT g.id, g.nom, g.description, g.categorie, g.icone, g.cree_le, g.createur_id,
+      `SELECT g.id, g.nom, g.description, g.categorie, g.icone, g.pays, g.ville, g.cree_le, g.createur_id,
               (SELECT count(*)::int FROM membres_groupes m WHERE m.groupe_id = g.id) AS nb_membres,
               (SELECT m.role FROM membres_groupes m
                 WHERE m.groupe_id = g.id AND m.utilisateur_id = $2)                  AS mon_role
@@ -45,6 +45,8 @@ const groupePatchSchema = z.object({
   description: z.string().trim().max(500).nullable().optional(),
   categorie: z.string().trim().max(40).nullable().optional(),
   icone: z.string().trim().max(40).nullable().optional(),
+  pays: z.string().trim().min(2).max(60).nullable().optional(),
+  ville: z.string().trim().min(2).max(60).nullable().optional(),
 });
 
 // PATCH /api/groupes/[id] : modifier le groupe (propriétaire ou admin)
@@ -88,7 +90,7 @@ export async function PATCH(
     const set = champs.map(([colonne], i) => `${colonne} = $${i + 2}`).join(', ');
     const result = await pool.query(
       `UPDATE groupes SET ${set} WHERE id = $1
-       RETURNING id, nom, description, categorie, icone, cree_le`,
+      RETURNING id, nom, description, categorie, icone, pays, ville, cree_le`,
       [groupeId, ...champs.map(([, v]) => v)]
     );
     if (result.rows.length === 0) {

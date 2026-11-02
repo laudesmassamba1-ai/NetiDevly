@@ -22,7 +22,7 @@ export async function GET(
 
     const result = await pool.query(
       `SELECT u.id, u.pseudo, u.nom_affiche, u.type_compte, u.est_verifie,
-              u.bio, u.theme_banniere, u.filiere, u.niveau_etude, u.cree_le,
+              u.bio, u.theme_banniere, u.filiere, u.niveau_etude, u.pays, u.ville, u.cree_le,
               (SELECT count(*)::int FROM abonnements a WHERE a.suivi_id  = u.id) AS nb_abonnes,
               (SELECT count(*)::int FROM abonnements a WHERE a.abonne_id = u.id) AS nb_abonnements,
               (SELECT count(*)::int FROM publications p WHERE p.auteur_id = u.id) AS nb_publications,
